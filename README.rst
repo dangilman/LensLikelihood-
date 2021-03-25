@@ -17,7 +17,7 @@ lenslikelihood contains the joint inference of several parameters describing dar
 
 You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D" and "folding_in_priors" for usage examples. 
 
-In order to use this package, you'll also need to clone this repository, which handles the joint likelihood computation and plotting routines: https://github.com/dangilman/trikde
+In order to use this package, you'll also need to clone this repository: https://github.com/dangilman/trikde, which handles the joint likelihood computation and plotting routines: 
 
 
 Python Boilerplate contains all the boilerplate you need to create a Python package.
