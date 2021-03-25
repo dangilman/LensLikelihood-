@@ -19,14 +19,6 @@ You can then evaluate the likelihood, or sample from it. See the example noteboo
 
 In order to use this package, you'll also need to clone this repository: https://github.com/dangilman/trikde, which handles the joint likelihood computation and plotting routines: 
 
-
-Python Boilerplate contains all the boilerplate you need to create a Python package.
-
-
-* Free software: MIT license
-* Documentation: https://lenslikelihood.readthedocs.io.
-
-
 Features
 --------
 
