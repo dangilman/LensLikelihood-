@@ -13,7 +13,7 @@ LensLikelihood
         :target: https://lenslikelihood.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-lenslikelihood contains the joint inference of several parameters describing dark matter substructure in the Universe with a sample of 12 strong gravitational lenses. To get started using this data product, you'll need to download the likelihoods from dropbox: https://www.dropbox.com/s/lp3hftzerj0oksj/precomputed_likelihoods.zip?dl=0
+lenslikelihood contains the joint inference of several parameters describing dark matter substructure in the Universe with a sample of 12 strong gravitational lenses. To get started using this data product, you'll need to download the likelihoods from dropbox: https://www.dropbox.com/s/pc4nuyyjv1ffzpa/precomputed_likelihoods.zip?dl=0
 and then place them in the directory lenslikelihood/precomputed_likelihoods
 
 You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D" and "folding_in_priors" for usage examples. 
