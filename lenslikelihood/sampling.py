@@ -1,5 +1,7 @@
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RegularGridInterpolator, interpn
 import numpy as np
+import itertools
+
 """
 This class interpolates a likelihood, and returns a probability given a point in parameter space
 """
@@ -7,7 +9,7 @@ This class interpolates a likelihood, and returns a probability given a point in
 
 class InterpolatedLikelihood(object):
 
-    def __init__(self, independent_densities, param_names, param_ranges):
+    def __init__(self, independent_densities, param_names, param_ranges, extrapolate=False):
 
         prod = independent_densities.density.T
         norm = np.max(prod)
@@ -16,12 +18,19 @@ class InterpolatedLikelihood(object):
 
         nbins = np.shape(prod)[0]
         points = []
-        for range in param_ranges:
-            points.append(np.linspace(range[0], range[-1], nbins))
+        for ran in param_ranges:
+            points.append(np.linspace(ran[0], ran[-1], nbins))
 
-        self.interp = RegularGridInterpolator(points, self.density)
+        if extrapolate:
+            kwargs_interpolator = {'bounds_error': False, 'fill_value': None}
+        else:
+            kwargs_interpolator = {}
 
-    def sample(self, n):
+        self._extrapolate = extrapolate
+
+        self.interp = RegularGridInterpolator(points, self.density, **kwargs_interpolator)
+
+    def sample(self, n, nparams=None, pranges=None):
 
         """
         Generates n samples of the parameters in param_names from the likelihood through rejection sampling
@@ -29,12 +38,21 @@ class InterpolatedLikelihood(object):
         if param_names is None, will generate samples of all param_names used to initialize the class
         """
 
-        shape = (n, len(self.param_names))
+        if nparams is None:
+            nparams = len(self.param_names)
+        if pranges is None:
+            pranges = self.param_ranges
+
+        shape = (n, nparams)
         samples = np.empty(shape)
         count = 0
+        last_ratio = 0
+
+        readout = n / 10
+
         while True:
             proposal = []
-            for ran in self.param_ranges:
+            for ran in pranges:
                 proposal.append(np.random.uniform(ran[0], ran[1]))
             proposal = tuple(proposal)
             like = self(proposal)
@@ -44,6 +62,13 @@ class InterpolatedLikelihood(object):
                 count += 1
             if count == n:
                 break
+
+            current_ratio = count/n
+
+            if count%readout == 0 and last_ratio != current_ratio:
+                print('sampling.... '+str(np.round(100*count/n, 2))+'%')
+                last_ratio = count/n
+
         return samples
 
     def __call__(self, point):
@@ -62,5 +87,9 @@ class InterpolatedLikelihood(object):
                 new_point = np.random.uniform(self.param_ranges[i][0], self.param_ranges[i][1])
                 point[i] = new_point
             elif value < self.param_ranges[i][0] or value > self.param_ranges[i][1]:
-                raise Exception('point was out of bounds: ', point)
-        return float(self.interp(point))
+                if self._extrapolate is False:
+                    raise Exception('point was out of bounds: ', point)
+
+        p = float(self.interp(point))
+
+        return min(1., max(p, 0.))
