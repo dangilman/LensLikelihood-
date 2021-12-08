@@ -13,12 +13,14 @@ LensLikelihood
         :target: https://lenslikelihood.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-lenslikelihood contains the joint inference of several parameters describing dark matter substructure in the Universe with a sample of 12 strong gravitational lenses. To get started using this data product, you'll need to download the likelihoods from dropbox: https://www.dropbox.com/s/pc4nuyyjv1ffzpa/precomputed_likelihoods.zip?dl=0
+lenslikelihood contains the joint inference of several parameters describing dark matter substructure in the Universe with a sample of 11 strong gravitational lenses. To get started using this data product, you'll need to download the likelihoods from dropbox: https://www.dropbox.com/s/pc4nuyyjv1ffzpa/precomputed_likelihoods.zip?dl=0
 and then place them in the directory lenslikelihood/precomputed_likelihoods
 
-You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D" and "folding_in_priors" for usage examples. 
+You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D_fromscratch_logprior" and "folding_in_priors" for usage examples. 
 
-In order to use this package, you'll also need to clone this repository: https://github.com/dangilman/trikde, which handles the joint likelihood computation and plotting routines: 
+In order to use this package, you'll also need to clone this repository: https://github.com/dangilman/trikde, which handles the joint likelihood computation and plotting routines. 
+
+This repository contains the data and analysis scripts used in the publiction https://ui.adsabs.harvard.edu/abs/2021arXiv211203293G/abstract titled "The primordial matter power spectrum on sub-galactic scales" in the folder notebooks_Pk. 
 
 Features
 --------
