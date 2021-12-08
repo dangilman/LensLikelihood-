@@ -1,14 +1,14 @@
 import numpy as np
 
 # name of each lens system
-all_param_ranges = {'sigma_sub': [0, 0.1], 'LOS_normalization': [0., 2.0], 'delta_power_law_index': [-0.6, 0.9],
+all_param_ranges = {'sigma_sub': [0, 0.125], 'LOS_normalization': [0., 2.0], 'delta_power_law_index': [-0.6, 0.9],
                'c0': [1, 200], 'beta': [0., 6.0], 'delta_power_law_index_coupling': [0., 1.], 'a_m_1': [-0.04, 0.04]}
 all_param_ranges_loguniformc0 = {'sigma_sub': [0, 0.1], 'LOS_normalization': [0., 2.0], 'delta_power_law_index': [-0.6, 0.9],
                'c0': [0, 2.3], 'beta': [0., 4.0], 'delta_power_law_index_coupling': [0., 1.], 'a_m_1': [-0.04, 0.04]}
-all_param_ranges_version2 = {'sigma_sub': [0, 0.1], 'LOS_normalization': [0., 2.0], 'delta_power_law_index': [-0.6, 0.9],
+all_param_ranges_version2 = {'sigma_sub': [0, 0.125], 'LOS_normalization': [0., 2.5], 'delta_power_law_index': [-0.6, 0.9],
                'log10c0': [0, 4], 'beta': [-0.2, 15.0], 'delta_power_law_index_coupling': [0.7, 1.], 'a_m_1': [-0.04, 0.04]}
 
-all_lens_names = ['WGDJ0405',
+all_lens_names = [
             'HE0435',
             'WGD2038',
             'B1422',
@@ -16,10 +16,9 @@ all_lens_names = ['WGDJ0405',
             'PSJ1606',
             'WFI2026',
             'RXJ0911',
-            'RXJ1131',
             'MG0414',
-            'PG1115',
-                  ]
+            'PG1115', 'RXJ1131',
+                  'WGDJ0405']
 
 # the measured image fluxes for each system
 _mg0414_fluxes = np.array([1, 0.83, 0.36, 0.16]) # Stacey et al. 2020

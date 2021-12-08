@@ -31,6 +31,18 @@ class RawLensSamples(object):
         fluxes = raw_lens_samples.fluxes_modeled[inds, :]
         return RawLensSamples(fluxes, samples_array, param_names)
 
+    @classmethod
+    def add_new_samples(cls, raw_samples, new_samples):
+
+        for name in raw_samples.param_names:
+            assert name in new_samples.param_names
+
+        fluxes_modeled = np.vstack((raw_samples.fluxes_modeled, new_samples.fluxes_modeled))
+        samples_array = np.vstack((raw_samples.samples_array, new_samples.samples_array))
+        param_names_list = raw_samples.param_names
+
+        return RawLensSamples(fluxes_modeled, samples_array, param_names_list)
+
     def sample_fluxes_from_params(self, param_dictionary):
 
         penalty = 0
@@ -41,7 +53,8 @@ class RawLensSamples(object):
         return self.fluxes_modeled[idx, :]
 
     def sample_with_abc(self, fluxes_measured, param_names, flux_sigmas_model, flux_ratio_index, n_keep,
-                        n_draw=5, uncertaintiy_in_ratios=False, flux_sigmas_measured=None, importance_sampling_weights=None):
+                        n_draw=5, uncertaintiy_in_ratios=False, flux_sigmas_measured=None,
+                        importance_sampling_weights=None, stat_cut=None):
 
         if importance_sampling_weights is not None:
             print('number of samples before importance sampling: ', self.samples_array.shape[0])
@@ -76,11 +89,18 @@ class RawLensSamples(object):
                 params = np.vstack((params, samples_array_full[keep_inds, :]))
                 statistic = np.append(statistic, stat[keep_inds])
 
+        if stat_cut is not None:
+            inds = np.where(statistic <= stat_cut)[0]
+            params_keep = params[inds, :]
+            statistic = statistic[inds]
+        else:
+            params_keep = params
+
         keep_columns = []
         for param_name in param_names:
             keep_columns.append(self.param_names.index(param_name))
 
-        return params[:, keep_columns], params, statistic
+        return params_keep[:, keep_columns], params, statistic
 
     def _importance_sampling(self, weights):
 
@@ -128,6 +148,7 @@ class RawLensSamples(object):
         keep_inds = np.array(keep_inds)
         nrows = fluxes.shape[0]
         flux_ratios = np.empty((nrows, 3))
+        flux_ratio_index = int(flux_ratio_index)
         if fluxes.ndim == 2:
             for row in range(0, nrows):
                 fr = fluxes[row, :] / fluxes[row, flux_ratio_index]
@@ -160,7 +181,7 @@ class RawLensSamples(object):
         return RawLensSamples(fluxes, samples_array, param_names)
 
 
-def compile_raw_samples(fname_base_list, i_max):
+def compile_raw_samples(fname_base_list, i_max, read_macro=True):
     """
     Loads the parameter samples and flux ratios from text files that contain the output from a computation run
     in parrallel on a computing cluster.
@@ -190,6 +211,8 @@ def compile_raw_samples(fname_base_list, i_max):
                 shuffle_columns_macro = [param_names_new.index(param) for param in param_names_macro]
 
         for i in range(1, i_max+1):
+            if i%100 == 0 or i==1:
+                print('reading file '+str(i)+' out of '+str(i_max)+'... ')
             file_name_params = fname_base + '/chain_' + str(i) + '/parameters.txt'
             file_name_fluxes = fname_base + '/chain_' + str(i) + '/fluxes.txt'
             file_name_macro = fname_base + '/chain_' + str(i) + '/macro.txt'
@@ -197,28 +220,50 @@ def compile_raw_samples(fname_base_list, i_max):
                 if init:
                     params = np.loadtxt(file_name_params, skiprows=1)
                     fluxes = np.loadtxt(file_name_fluxes)
-                    macro = np.loadtxt(file_name_macro, skiprows=1)
-                    if macro.shape[0] != fluxes.shape[0] or macro.shape[0] != params.shape[0]:
-                        pass
-                    else:
-                        params = np.loadtxt(file_name_params, skiprows=1)
-                        fluxes = np.loadtxt(file_name_fluxes)
+                    if read_macro:
                         macro = np.loadtxt(file_name_macro, skiprows=1)
-                        init = False
+                        if macro.shape[0] != fluxes.shape[0] or macro.shape[0] != params.shape[0]:
+                            pass
+                        else:
+                            params = np.loadtxt(file_name_params, skiprows=1)
+                            fluxes = np.loadtxt(file_name_fluxes)
+                            macro = np.loadtxt(file_name_macro, skiprows=1)
+                            init = False
+                    else:
+                        if fluxes.shape[0] != params.shape[0]:
+                            pass
+                        else:
+                            params = np.loadtxt(file_name_params, skiprows=1)
+                            fluxes = np.loadtxt(file_name_fluxes)
+                            init = False
                 else:
                     new_params = np.loadtxt(file_name_params, skiprows=1)
                     new_fluxes = np.loadtxt(file_name_fluxes)
-                    new_macro = np.loadtxt(file_name_macro, skiprows=1)
-                    if new_macro.shape[0] != new_fluxes.shape[0] or new_macro.shape[0] != new_params.shape[0]:
-                        pass
-                    else:
-                        new_params = new_params[:, shuffle_columns_params]
-                        new_macro = new_macro[:, shuffle_columns_macro]
-                        params = np.vstack((params, new_params))
-                        fluxes = np.vstack((fluxes, new_fluxes))
-                        macro = np.vstack((macro, new_macro))
+                    if read_macro:
+                        new_macro = np.loadtxt(file_name_macro, skiprows=1)
+                        if new_macro.shape[0] != new_fluxes.shape[0] or new_macro.shape[0] != new_params.shape[0]:
+                            print('shape mismatch on file '+str(i))
+                            pass
+                        else:
+                            new_params = new_params[:, shuffle_columns_params]
+                            new_macro = new_macro[:, shuffle_columns_macro]
+                            params = np.vstack((params, new_params))
+                            fluxes = np.vstack((fluxes, new_fluxes))
+                            macro = np.vstack((macro, new_macro))
 
-    param_names_full = param_names + param_names_macro
-    params_full = np.column_stack((params, macro))
+                    else:
+                        if new_fluxes.shape[0] != new_params.shape[0]:
+                            print('shape mismatch on file '+str(i))
+                        else:
+                            new_params = new_params[:, shuffle_columns_params]
+                            params = np.vstack((params, new_params))
+                            fluxes = np.vstack((fluxes, new_fluxes))
+
+    if read_macro:
+        param_names_full = param_names + param_names_macro
+        params_full = np.column_stack((params, macro))
+    else:
+        param_names_full = param_names
+        params_full = params
 
     return RawLensSamples(fluxes, params_full, param_names_full)
