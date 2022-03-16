@@ -14,9 +14,9 @@ LensLikelihood
         :alt: Documentation Status
 
 lenslikelihood contains the joint inference of several parameters describing dark matter substructure in the Universe with a sample of 11 strong gravitational lenses. To get started using this data product, you'll need to download the likelihoods from dropbox: https://www.dropbox.com/s/pc4nuyyjv1ffzpa/precomputed_likelihoods.zip?dl=0
-and then place them in the directory lenslikelihood/precomputed_likelihoods
+and then place them in the directory lenslikelihood/precomputed_likelihoods. 
 
-You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D_fromscratch_logprior" and "folding_in_priors" for usage examples. 
+You can then evaluate the likelihood, or sample from it. See the example notebooks "inference_5D_logprior" and "folding_in_priors" for usage examples. 
 
 In order to use this package, you'll also need to clone this repository: https://github.com/dangilman/trikde, which handles the joint likelihood computation and plotting routines. 
 
